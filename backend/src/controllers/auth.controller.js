@@ -114,7 +114,7 @@ export const updateProfile = async (req, res) => {
             {
                 profilePic: uploadResponse.secure_url,
             },
-            { new: true },
+            { returnDocument: "after" },
         );
 
         res.status(200).json(updatedUser);
