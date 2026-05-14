@@ -10,13 +10,18 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
 
+// increase file upload limit
+app.use(express.json({ limit: "2mb" })); 
+app.use(express.urlencoded({ limit: "2mb", extended: true }));
+
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({
-    origin: "htpp://localhost:5176",
-    // allows cookie credentials to be sent with the request
-    credentials: true,
-}))
+app.use(
+    cors({
+        origin: "http://localhost:5174",
+        credentials: true,
+    }),
+);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
@@ -25,7 +30,8 @@ app.get("/", (req, res) => {
     res.send("Hello World!");
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, (error) => {
     console.log(`App running on port: `, PORT);
     connectDB();
+    if (error) console.log(error);
 });
