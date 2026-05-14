@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
 
-// middleware to check user is authenticated before letting him modify anything related to profile
+// middleware to check user is authenticated before letting him into certain parts of the profile
 export const protectRoute = async (req, res, next) => {
     try {
         const token = req.cookies.token;
