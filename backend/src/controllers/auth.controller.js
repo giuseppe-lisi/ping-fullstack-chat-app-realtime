@@ -1,6 +1,7 @@
 import { generateToken } from "../lib/utils.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
     const { fullName, email, password } = req.body;
@@ -94,6 +95,37 @@ export const logout = (req, res) => {
     }
 };
 
-export const updateProfile = (req, res) => {
-    return res.send("updating profile");
-}
+export const updateProfile = async (req, res) => {
+    try {
+        const { profilePic } = req.body;
+        const userId = req.user._id;
+
+        if (!profilePic) {
+            return res
+                .status(400)
+                .json({ message: "Profile picture is required" });
+        }
+
+        const uploadResponse = await cloudinary.uploader.upload(profilePic);
+        // gets user by id received from protectRoute and updates pfp. Also return updated user, not user pre-update
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            {
+                profilePic: uploadResponse.secure_url,
+            },
+            { new: true },
+        );
+    } catch (error) {
+        console.log("Error in update-profile controller: ", error.message);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const checkAuth = async (req, res) => {
+    try {
+        return res.status(200).json(req.user);
+    } catch (error) {
+        console.log("Error in checkAuth controller: ", error.message)
+        return res.status(500).json({ message: "Internal server error" })
+    }
+};
