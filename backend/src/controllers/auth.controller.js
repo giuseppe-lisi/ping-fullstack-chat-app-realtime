@@ -11,10 +11,11 @@ export const signup = async (req, res) => {
                 .status(400)
                 .json({ message: "Please fill out all the fields" });
         }
-        if (password.length < 6)
+        if (password.length < 6) {
             return res.status(400).json({
                 message: "Password must be at least 6 characters long",
             });
+        }
 
         const user = await User.findOne({ email });
 
@@ -106,8 +107,8 @@ export const updateProfile = async (req, res) => {
                 .json({ message: "Profile picture is required" });
         }
 
+        // sends pfp to cloudinary and returns user with updated pfp link
         const uploadResponse = await cloudinary.uploader.upload(profilePic);
-        // gets user by id received from protectRoute and updates pfp. Also return updated user, not user pre-update
         const updatedUser = await User.findByIdAndUpdate(
             userId,
             {
@@ -115,6 +116,8 @@ export const updateProfile = async (req, res) => {
             },
             { new: true },
         );
+
+        res.status(200).json(updatedUser);
     } catch (error) {
         console.log("Error in update-profile controller: ", error.message);
         return res.status(500).json({ message: "Internal server error" });
