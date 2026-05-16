@@ -33,7 +33,7 @@ app.use("/api/messages", messageRoutes);
 // in production, we serve api and frontend in the same place
 if (process.env.NODE_ENV === "production") {
     // Go up ONE level (out of 'backend') to reach the project root
-    const frontendPath = path.join(__dirname, "../", "frontend", "dist");
+    const frontendPath = path.join(__dirname, "../..", "frontend", "dist");
 
     // Serve the static files
     app.use(express.static(frontendPath));
