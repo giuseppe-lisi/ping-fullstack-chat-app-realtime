@@ -79,7 +79,13 @@ export const login = async (req, res) => {
 
         generateToken(user._id, res);
 
-        res.status(200).json({ message: "Successfully logged in" });
+        res.status(200).json({
+            _id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            profilePic: user.profilePic,
+            createdAt: user.createdAt,
+        });
     } catch (error) {
         console.log(`Error in login controller: ${error.message}`);
         res.status(401).json({ message: "Internal server error" });
@@ -128,7 +134,7 @@ export const checkAuth = async (req, res) => {
     try {
         return res.status(200).json(req.user);
     } catch (error) {
-        console.log("Error in checkAuth controller: ", error.message)
-        return res.status(500).json({ message: "Internal server error" })
+        console.log("Error in checkAuth controller: ", error.message);
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
