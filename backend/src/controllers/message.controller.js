@@ -1,5 +1,7 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js";
+import cloudinary from "../lib/cloudinary.js";
+import { getReceiverSocketId, io } from "../lib/socket.js";
 
 export const getUsersForSidebar = async (req, res) => {
     try {
@@ -8,7 +10,7 @@ export const getUsersForSidebar = async (req, res) => {
             _id: { $ne: loggedUserId },
         }).select("-password");
 
-        res.status(200).json({ sidebarUsers });
+        res.status(200).json(sidebarUsers);
     } catch (error) {
         console.log("Error in getUsersForSidebar method: ", error.message);
         res.status(500).json({ message: "Internal server error" });
@@ -28,7 +30,7 @@ export const getMessages = async (req, res) => {
             ],
         });
 
-        res.status(200).json({ messages });
+        res.status(200).json(messages);
     } catch (error) {
         console.log("Error in getMessages controller: ", error.message);
         res.status(500).json({ message: "Internal server error" });
@@ -41,10 +43,10 @@ export const sendMessage = async (req, res) => {
         const { id: receiverId } = req.params;
         const senderId = req.user._id;
 
-        let imgUrl;
+        let imgUrl = "";
         if (image) {
             const uploadResponse = await cloudinary.uploader.upload(image);
-            imageUrl = uploadResponse;
+            imgUrl = uploadResponse.secure_url;
         }
 
         const newMessage = new Message({
@@ -56,7 +58,11 @@ export const sendMessage = async (req, res) => {
 
         await newMessage.save();
 
-        // todo: realtime functionality with socket.io
+        // realtime functionality
+        const receiverSocket = getReceiverSocketId(receiverId);
+        if (receiverSocket) {
+            io.to(receiverSocket).emit("newMessage", newMessage);
+        }
 
         res.status(201).json(newMessage);
     } catch (error) {
